@@ -4,6 +4,6 @@ FROM alpine:latest
 RUN apk add --update git nodejs npm python3 py3-pip aws-cli
 WORKDIR /app
 
-# RUN npm install
+RUN python -m pip install boto3
 
 CMD tail -f /dev/null

@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as sso from 'aws-cdk-lib/aws-sso';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -14,12 +15,44 @@ export class AppStack extends cdk.Stack {
       visibilityTimeout: cdk.Duration.seconds(300)
     });
 
-    //Create an IAM Identity Center Permission set
-
     // List of Accounts in the Organisation
     const accountList = {
       master: '975848467324'
     };
+
+    //IAM
+    //Create an IAM User group for CI/CD
+    const cicdGroup = new iam.Group(this, 'CICDGroup', {
+      groupName: 'CICDGroup',
+      managedPolicies: [
+        //S3 Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
+        //Lambda Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess'),
+        //CloudWatch Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess'),
+        //AppSync Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncAdministrator'),
+        //DynamoDB Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'),
+        //AMPLIFY Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess-Amplify'),
+        //API Gateway Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayAdministrator')
+      ]
+    });
+
+    //Create an IAM User for CI/CD
+    const cicdUser = new iam.User(this, 'CICDUser', {
+      userName: 'CICDUser',
+      groups: [cicdGroup],
+      // managedPolicies: [
+      //   //S3 Full Access
+      //   iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess')
+      // ]
+    });
+
+    //Create an IAM Identity Center Permission set
 
     // List of Groups in SSO
     const groupList = {
@@ -77,6 +110,26 @@ export class AppStack extends cdk.Stack {
       permissionSetArn: permissionSet.attrPermissionSetArn,
       targetId: '975848467324',
       targetType: 'AWS_ACCOUNT',
+    });
+
+    //Deploy a Lambda Function
+
+    //Create a Lambda Function Role
+    const adminLambdaRole = new iam.Role(this, 'AdminLambdaRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        //IAM Full Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('IAMFullAccess')
+      ]
+    });
+
+    //Create a Python Lambda Function
+    const adminLambda = new lambda.Function(this, 'AdminLambda', {
+      runtime: lambda.Runtime.PYTHON_3_8,
+      code: lambda.Code.fromAsset('lambda/rescleaner'),
+      handler: 'main.lambda_handler',
+      role: adminLambdaRole,
+      functionName: 'ResourceCleaner'
     });
 
   }
