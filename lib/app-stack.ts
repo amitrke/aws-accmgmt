@@ -21,7 +21,7 @@ export class AppStack extends cdk.Stack {
     };
 
     // List of common managed policies
-    const managedPolicies = [ 'AWSBillingReadOnlyAccess', 'CloudWatchFullAccess', 'IAMReadOnlyAccess', 'AmazonRoute53ReadOnlyAccess', 'AmplifyReadOnlyAccess', 'AWSLambdaReadOnlyAccess', 'AmazonS3ReadOnlyAccess', 'AmazonDynamoDBReadOnlyAccess', 'AWSAppSyncReadOnlyAccess' ];
+    const managedPolicies = ['AWSBillingReadOnlyAccess', 'CloudWatchFullAccess', 'IAMReadOnlyAccess', 'AmazonRoute53ReadOnlyAccess', 'AdministratorAccess-Amplify', 'AWSLambda_ReadOnlyAccess', 'AmazonS3ReadOnlyAccess', 'AmazonDynamoDBReadOnlyAccess', 'AWSAppSyncAdministrator'];
 
     //IAM
     //Create an IAM User group for CI/CD
