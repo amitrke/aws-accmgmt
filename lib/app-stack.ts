@@ -97,7 +97,9 @@ export class AppStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncAdministrator').managedPolicyArn,
         iam.ManagedPolicy.fromAwsManagedPolicyName('AWSBillingReadOnlyAccess').managedPolicyArn,
         iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess').managedPolicyArn,
-        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess').managedPolicyArn
+        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess').managedPolicyArn,
+        //IAM ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('IAMReadOnlyAccess').managedPolicyArn,
       ],
       inlinePolicy: examplePolicy
     });
