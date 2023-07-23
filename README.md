@@ -1,8 +1,8 @@
-# Welcome to your CDK TypeScript project
+# AWS Account Management
 
-This is a blank project for CDK development with TypeScript.
+## Problem Statement
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+I prefer to not use AWS Root user to manage resources and instead create IAM users with appropriate permissions. This project is to automate the creation of IAM users and groups.
 
 ## Useful commands
 
