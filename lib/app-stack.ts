@@ -20,6 +20,9 @@ export class AppStack extends cdk.Stack {
       master: '975848467324'
     };
 
+    // List of Applications, write access to resources related to these applications will be granted.
+    const appList = [ "poc", "snxt" ]
+
     // List of common managed policies
     const managedPolicies = ['AWSBillingReadOnlyAccess', 'CloudWatchFullAccess', 'IAMReadOnlyAccess', 'AmazonRoute53ReadOnlyAccess', 'AdministratorAccess-Amplify', 'AWSLambda_ReadOnlyAccess', 'AmazonS3ReadOnlyAccess', 'AmazonDynamoDBReadOnlyAccess', 'AWSAppSyncAdministrator'];
 
@@ -33,54 +36,88 @@ export class AppStack extends cdk.Stack {
     //Create an IAM User for CI/CD
     const cicdUser = new iam.User(this, 'CICDUser', {
       userName: 'CICDUser',
-      groups: [cicdGroup],
-      // managedPolicies: [
-      //   //S3 Full Access
-      //   iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess')
-      // ]
+      groups: [cicdGroup]
     });
 
     //Create an IAM Identity Center Permission set
 
     // List of Groups in SSO
-    const groupList = {
-      Developers: 'e478f438-d011-7082-e065-20c145364809',
-      // ReadOnly: '9a67298558-8fb7193d-7b2f-4161-a372-xxxxxxxxxxxx',
-    };
+    // const groupList = {
+    //   Developers: 'e478f438-d011-7082-e065-20c145364809',
+    //   // ReadOnly: '9a67298558-8fb7193d-7b2f-4161-a372-xxxxxxxxxxxx',
+    // };
 
-    // Developer Inline Policy
-    const devInlinePolicy = {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Sid: 'ManageEc2',
-          Effect: 'Allow',
-          Action: [
-            'ec2:RebootInstances',
-            'ec2:StartInstances',
-            'ec2:StopInstances',
-          ],
-          Resource: '*',
-        },
-        {
-          Sid: 'AllowS3Objects',
-          Effect: 'Allow',
-          Action: [
-            's3:PutObject',
-            's3:GetObject',
-          ],
-          Resource: '*',
-        },
-      ],
-    };
+    /**
+     * Create a policy for each application and attach it to the IAM User group
+     * grant access to S3 buckets with the same name as the application
+     * grant access to DynamoDB tables with the same name as the application
+     * grant access to AppSync APIs with the same name as the application
+     * grant access to Lambda functions with the same name as the application
+     * grant access to API Gateway APIs with the same name as the application
+     * 
+     * TODO: Update ARNs to only us-east-1 region.
+     */
+    appList.forEach((app) => {
+      const appPolicy = new iam.Policy(this, `${app}Policy`, {
+        policyName: `${app}Policy`,
+        statements: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              's3:*',
+            ],
+            resources: [
+              `arn:aws:s3:::${app}*`
+            ],
+          }),
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              'dynamodb:*',
+            ],
+            resources: [
+              `arn:aws:dynamodb:*:*:table/${app}*`,
+            ],
+          }),
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              'appsync:*'
+            ],
+            resources: [
+              `arn:aws:appsync:*:*:apis/GraphQLAPI*`,
+            ],
+          }),
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              'lambda:*'
+            ],
+            resources: [
+              `arn:aws:lambda:*:*:function:${app}*`,
+            ],
+          }),
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              'apigateway:*'
+            ],
+            resources: [
+              `arn:aws:apigateway:*::/restapis/*`,
+            ],
+          }),
+        ],
+      });
+      
+      appPolicy.attachToGroup(cicdGroup);
+    });
 
     const permissionSet = new sso.CfnPermissionSet(this, 'PermissionSet', {
       instanceArn: 'arn:aws:sso:::instance/ssoins-72238797c66ec2b2',
       name: 'DeveloperPermissionSet',
       description: 'Developer Permission Set',
       // relayStateType: 'URL',
-      managedPolicies: this.toManagedPolicyArnList(managedPolicies),
-      inlinePolicy: devInlinePolicy
+      managedPolicies: this.toManagedPolicyArnList(managedPolicies)
     });
 
     //Create an IAM Identity Center Assignment
