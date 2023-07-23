@@ -20,26 +20,14 @@ export class AppStack extends cdk.Stack {
       master: '975848467324'
     };
 
+    // List of common managed policies
+    const managedPolicies = [ 'AWSBillingReadOnlyAccess', 'CloudWatchFullAccess', 'IAMReadOnlyAccess', 'AmazonRoute53ReadOnlyAccess', 'AmplifyReadOnlyAccess', 'AWSLambdaReadOnlyAccess', 'AmazonS3ReadOnlyAccess', 'AmazonDynamoDBReadOnlyAccess', 'AWSAppSyncReadOnlyAccess' ];
+
     //IAM
     //Create an IAM User group for CI/CD
     const cicdGroup = new iam.Group(this, 'CICDGroup', {
       groupName: 'CICDGroup',
-      managedPolicies: [
-        //S3 Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
-        //Lambda Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess'),
-        //CloudWatch Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess'),
-        //AppSync Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncAdministrator'),
-        //DynamoDB Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess'),
-        //AMPLIFY Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess-Amplify'),
-        //API Gateway Full Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayAdministrator')
-      ]
+      managedPolicies: this.toIManagedPolicyList(managedPolicies)
     });
 
     //Create an IAM User for CI/CD
@@ -91,24 +79,7 @@ export class AppStack extends cdk.Stack {
       name: 'DeveloperPermissionSet',
       description: 'Developer Permission Set',
       // relayStateType: 'URL',
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSBillingReadOnlyAccess').managedPolicyArn,
-        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess').managedPolicyArn,
-        //IAM ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('IAMReadOnlyAccess').managedPolicyArn,
-        //Route53 ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonRoute53ReadOnlyAccess').managedPolicyArn,
-        //Amplify ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmplifyReadOnlyAccess').managedPolicyArn,
-        //Lambda ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambdaReadOnlyAccess').managedPolicyArn,
-        //S3 ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess').managedPolicyArn,
-        //DynanoDB ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBReadOnlyAccess').managedPolicyArn,
-        //AppSync ReadOnly Access
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncReadOnlyAccess').managedPolicyArn,
-      ],
+      managedPolicies: this.toManagedPolicyArnList(managedPolicies),
       inlinePolicy: devInlinePolicy
     });
 
@@ -143,4 +114,17 @@ export class AppStack extends cdk.Stack {
     });
 
   }
+
+  toIManagedPolicyList = (managedPolicies: string[]) => {
+    return managedPolicies.map((managedPolicy) => {
+      return iam.ManagedPolicy.fromAwsManagedPolicyName(managedPolicy);
+    });
+  }
+
+  toManagedPolicyArnList = (managedPolicies: string[]) => {
+    return managedPolicies.map((managedPolicy) => {
+      return iam.ManagedPolicy.fromAwsManagedPolicyName(managedPolicy).managedPolicyArn;
+    });
+  }
 }
+
