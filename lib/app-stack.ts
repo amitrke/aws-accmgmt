@@ -60,8 +60,8 @@ export class AppStack extends cdk.Stack {
       // ReadOnly: '9a67298558-8fb7193d-7b2f-4161-a372-xxxxxxxxxxxx',
     };
 
-    // Example Inline Policy
-    const examplePolicy = {
+    // Developer Inline Policy
+    const devInlinePolicy = {
       Version: '2012-10-17',
       Statement: [
         {
@@ -109,7 +109,7 @@ export class AppStack extends cdk.Stack {
         //AppSync ReadOnly Access
         iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncReadOnlyAccess').managedPolicyArn,
       ],
-      inlinePolicy: examplePolicy
+      inlinePolicy: devInlinePolicy
     });
 
     //Create an IAM Identity Center Assignment
