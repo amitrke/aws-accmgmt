@@ -92,14 +92,22 @@ export class AppStack extends cdk.Stack {
       description: 'Developer Permission Set',
       // relayStateType: 'URL',
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBFullAccess').managedPolicyArn,
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess').managedPolicyArn,
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncAdministrator').managedPolicyArn,
         iam.ManagedPolicy.fromAwsManagedPolicyName('AWSBillingReadOnlyAccess').managedPolicyArn,
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess').managedPolicyArn,
         iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchFullAccess').managedPolicyArn,
         //IAM ReadOnly Access
         iam.ManagedPolicy.fromAwsManagedPolicyName('IAMReadOnlyAccess').managedPolicyArn,
+        //Route53 ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonRoute53ReadOnlyAccess').managedPolicyArn,
+        //Amplify ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmplifyReadOnlyAccess').managedPolicyArn,
+        //Lambda ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambdaReadOnlyAccess').managedPolicyArn,
+        //S3 ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess').managedPolicyArn,
+        //DynanoDB ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBReadOnlyAccess').managedPolicyArn,
+        //AppSync ReadOnly Access
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSAppSyncReadOnlyAccess').managedPolicyArn,
       ],
       inlinePolicy: examplePolicy
     });
