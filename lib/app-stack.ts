@@ -156,7 +156,7 @@ export class AppStack extends cdk.Stack {
     //Create an S3 Bucket for Terraform State
     const tfBucket = new s3.Bucket(this, 'TerraformBucket', {
       versioned: true,
-      bucketName: `terraform-state-bucket`,
+      bucketName: `${accountList['master']}-terraform-state-bucket-e1`,
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
