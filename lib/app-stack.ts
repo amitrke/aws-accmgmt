@@ -4,6 +4,9 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as sso from 'aws-cdk-lib/aws-sso';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -148,6 +151,18 @@ export class AppStack extends cdk.Stack {
       handler: 'main.lambda_handler',
       role: adminLambdaRole,
       functionName: 'ResourceCleaner'
+    });
+
+    //Create an S3 Bucket for Terraform State
+    const tfBucket = new s3.Bucket(this, 'TerraformBucket', {
+      versioned: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    });
+
+    //Create a DynamoDB Table for Terraform State Locking
+    const tfLockTable = new dynamodb.Table(this, 'TerraformLockTable', {
+      partitionKey: { name: 'LockID', type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
   }
