@@ -156,11 +156,13 @@ export class AppStack extends cdk.Stack {
     //Create an S3 Bucket for Terraform State
     const tfBucket = new s3.Bucket(this, 'TerraformBucket', {
       versioned: true,
+      bucketName: `terraform-state-bucket`,
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     //Create a DynamoDB Table for Terraform State Locking
     const tfLockTable = new dynamodb.Table(this, 'TerraformLockTable', {
+      tableName: 'TerraformLockTable',
       partitionKey: { name: 'LockID', type: dynamodb.AttributeType.STRING },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
