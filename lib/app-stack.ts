@@ -146,7 +146,7 @@ export class AppStack extends cdk.Stack {
 
     //Create a Python Lambda Function
     const adminLambda = new lambda.Function(this, 'AdminLambda', {
-      runtime: lambda.Runtime.PYTHON_3_8,
+      runtime: lambda.Runtime.PYTHON_3_13,
       code: lambda.Code.fromAsset('lambda/rescleaner'),
       handler: 'main.lambda_handler',
       role: adminLambdaRole,
@@ -167,6 +167,21 @@ export class AppStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    // Create a role for API Gateway to write logs to CloudWatch
+    const apiGwLogRole = new iam.Role(this, 'ApiGatewayCloudWatchLogsRole', {
+      assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonAPIGatewayPushToCloudWatchLogs')
+      ]
+    });
+
+    // Attach the role to the API Gateway account
+    new cdk.CfnResource(this, 'ApiGatewayAccount', {
+      type: 'AWS::ApiGateway::Account',
+      properties: {
+        CloudWatchRoleArn: apiGwLogRole.roleArn
+      }
+    });
   }
 
   toIManagedPolicyList = (managedPolicies: string[]) => {
