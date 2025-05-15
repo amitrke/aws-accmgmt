@@ -6,6 +6,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cloudtrail from 'aws-cdk-lib/aws-cloudtrail';
+import * as logs from 'aws-cdk-lib/aws-logs';
 
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -181,6 +183,26 @@ export class AppStack extends cdk.Stack {
       properties: {
         CloudWatchRoleArn: apiGwLogRole.roleArn
       }
+    });
+
+    // Create an S3 bucket for CloudTrail logs
+    const cloudTrailBucket = new s3.Bucket(this, 'CloudTrailBucket', {
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      lifecycleRules: [
+        {
+          expiration: cdk.Duration.days(30), // Change 30 to your desired retention period
+        },
+      ],
+    });
+
+    // Create a CloudTrail trail
+    const trail = new cloudtrail.Trail(this, 'AppTrail', {
+      bucket: cloudTrailBucket,
+      isMultiRegionTrail: true, // Set to true for global events
+      includeGlobalServiceEvents: true,
+      sendToCloudWatchLogs: true, // Optional: send logs to CloudWatch
+      cloudWatchLogsRetention: logs.RetentionDays.ONE_WEEK, // Optional: set retention period for CloudWatch logs
     });
   }
 
