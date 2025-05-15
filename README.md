@@ -12,3 +12,11 @@ I prefer to not use AWS Root user to manage resources and instead create IAM use
 * `cdk deploy`      deploy this stack to your default AWS account/region
 * `cdk diff`        compare deployed stack with current state
 * `cdk synth`       emits the synthesized CloudFormation template
+
+## Dependency updates
+
+* `npm install -g npm-check-updates`
+* `npm-check-updates -u`
+* `npm install`
+* `npm audit fix`
+* `npm audit fix --force` (if needed)
